@@ -2,10 +2,12 @@ package com.example.github_admin.di
 
 import com.example.github_admin.model.repository.GithubAdminRepository
 import com.example.github_admin.model.service.GithubApiService
+import com.example.github_admin.model.service.HeaderInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
@@ -14,10 +16,19 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
+
     @Provides
     @Singleton
-    fun provideRetrofit(): Retrofit {
-        return Retrofit.Builder().baseUrl("https://api.github.com/").addConverterFactory(
+    fun provideOkHttpClient(): OkHttpClient {
+        return OkHttpClient.Builder()
+            .addInterceptor(HeaderInterceptor())
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
+        return Retrofit.Builder().baseUrl("https://api.github.com/").client(okHttpClient).addConverterFactory(
             GsonConverterFactory.create()
         ).build()
     }
